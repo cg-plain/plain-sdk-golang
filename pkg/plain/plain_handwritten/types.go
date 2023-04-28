@@ -1,13 +1,16 @@
 package plain_handwritten
 
+import ("cg-plain/plain-sdk-golang/pkg/plain")
+
 type GraphqlResponse struct {
 	Data  GraphqlData `json:"data,omitempty"`
-	Error *string     `json:"error,omitempty"`
 }
 
 type GraphqlData struct {
-	UpsertCustomer            GraphqlObject `json:"upsertCustomer,omitempty"`
-	UpsertCustomTimelineEntry GraphqlObject `json:"upsertCustomTimelineEntry,omitempty"`
+	UpsertCustomer            *plain.UpsertCustomerOutput `json:"upsertCustomer,omitempty"`
+	UpsertCustomTimelineEntry *plain.UpsertCustomTimelineEntryOutput `json:"upsertCustomTimelineEntry,omitempty"`
+	CreateIssue *plain.CreateIssueOutput `json:"createIssue,omitempty"`
+	CreateIssueType *plain.CreateIssueTypeOutput `json:"createIssueType,omitempty"`
 }
 type GraphqlObject struct {
 	Customer      Customer      `json:"customer,omitempty"`

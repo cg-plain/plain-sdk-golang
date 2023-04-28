@@ -28,189 +28,147 @@ func New(logger *zap.SugaredLogger, apiKey string) *PlainClient {
 	}
 }
 
-type CustInput struct {
+type in struct {
 	Input plain.UpsertCustomerInput `json:"input,omitempty"`
 }
-
-type QueryOutput struct {
-	Data string `json:"data,omitempty"`
-}
-
-type QueryOutputData struct {
-	UpsertCustomer *plain.UpsertCustomerOutput `json:"upsert_customer,omitempty"`
-}
-
 func (c *PlainClient) UpsertCustomer(input plain.UpsertCustomerInput) (*plain.UpsertCustomerOutput, error) {
 	b, err := os.ReadFile("./pkg/plain/graphql/upsertCustomer.graphql") // just pass the file name
 	if err != nil {
 		return nil, err
 	}
-	custInput := CustInput{
+	mutationInput := in{
 		Input: input,
-	}
-	marshalled, err := json.Marshal(&custInput)
-	if err != nil {
-		return nil, err
-	}
-
-	fullQuery := Query{
-		Query:         string(b),
-		Variables:     string(marshalled),
-		OperationName: "upsertCustomer",
-	}
-
-	marshalledQuery, err := json.Marshal(&fullQuery)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest(http.MethodPost, plainUrl, bytes.NewReader(marshalledQuery))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
-	req.Header.Add("Content-Type", "application/json")
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	resBody, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("output %s", string(resBody))
-	outputStr := []byte("{\"data\":{\"upsertCustomer\":{\"result\":\"NOOP\",\"customer\":{\"id\":\"c_01GZ4AS090QYR8WDQ0CBG6Z5CS\",\"externalId\":null,\"shortName\":null,\"fullName\":\"hello world\",\"email\":{\"email\":\"hello@world.com\",\"isVerified\":true},\"status\":\"IDLE\"},\"error\":null}}}")
-	output := QueryOutput{}
-	json.Unmarshal(outputStr, &output)
-	fmt.Printf("%v", output)
-	//msg := plain.UpsertCustomerOutput{}
-	// json.Unmarshal(output["data"], &msg)
-	// fmt.Printf("msg %v", msg)
-	// if output.Data.UpsertCustomer.Error != nil {
-	// 	return nil, fmt.Errorf("Graphql error: %s", output.Data.UpsertCustomer.Error.Message)
-	// }
-	return nil, nil
-}
-
-func (c *PlainClient) CreateCustomer(email, fullName, shortName string) (string, error) {
-	b, err := os.ReadFile("./pkg/plain/graphql/upsertCustomer.graphql") // just pass the file name
-	if err != nil {
-		return "", err
-	}
-
-	mutationInput := CreateCustomerMutationInput{
-		Input: CreateCustomerInput{
-			Identifier: Identifier{
-				EmailAddress: email,
-			},
-			OnCreate: CreateCustomerData{
-				FullName:  fullName,
-				ShortName: shortName,
-				Email: Email{
-					Email: email,
-				},
-			},
-			OnUpdate: UpdateCustomerData{
-				FullName: UpdateObject{
-					Value: fullName,
-				},
-				ShortName: UpdateObject{
-					Value: shortName,
-				},
-				Email: Email{
-					Email: email,
-				},
-			},
-		},
 	}
 	marshalled, err := json.Marshal(&mutationInput)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
+	body, err := c.Query("upsertCustomer", string(b), string(marshalled))
+
+	target := GraphqlResponse{}
+	json.Unmarshal(body, &target)
+	if target.Data.UpsertCustomer.Error != nil {
+		return nil, fmt.Errorf("Graphql error: %s", *target.Data.UpsertCustomer.Error)
+	}
+	return target.Data.UpsertCustomer, nil
+}
+
+func (c *PlainClient) Query(operation, query, variables string) ([]byte, error) {
 	fullQuery := Query{
-		Query:         string(b),
-		Variables:     string(marshalled),
-		OperationName: "upsertCustomer",
+		Query:         query,
+		Variables:     variables,
+		OperationName: operation,
 	}
 
 	marshalledQuery, err := json.Marshal(&fullQuery)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	req, err := http.NewRequest(http.MethodPost, plainUrl, bytes.NewReader(marshalledQuery))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
 	req.Header.Add("Content-Type", "application/json")
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	resBody, err := io.ReadAll(res.Body)
-	if err != nil {
-		return "", err
-	}
-	target := GraphqlResponse{}
-	json.Unmarshal(resBody, &target)
-	if target.Error != nil {
-		return "", fmt.Errorf("Graphql error: %s", *target.Error)
-	}
-	c.logger.Debugf("Customer was %s, id: %s\n", target.Data.UpsertCustomer.Result, target.Data.UpsertCustomer.Customer.ID)
-	return target.Data.UpsertCustomer.Customer.ID, nil
+
+	return io.ReadAll(res.Body)
 }
 
-type TimelineData struct {
-	Subject string
-	Preview string
-	Date    string
+type timelineIn struct {
+	Input plain.UpsertCustomTimelineEntryInput `json:"input,omitempty"`
 }
-
+	
 func (c *PlainClient) UpsertCustomTimelineEntry(input plain.UpsertCustomTimelineEntryInput) (*plain.UpsertCustomTimelineEntryOutput, error) {
 	b, err := os.ReadFile("./pkg/plain/graphql/upsertCustomTimelineEntry.graphql") // just pass the file name
 	if err != nil {
 		return nil, err
 	}
-
-	marshalled, err := json.Marshal(&input)
+	mutationInput := timelineIn{
+		Input: input,
+	}
+	marshalled, err := json.Marshal(&mutationInput)
 	if err != nil {
 		return nil, err
 	}
 
-	fullQuery := Query{
-		Query:         string(b),
-		Variables:     string(marshalled),
-		OperationName: "upsertCustomTimelineEntry",
-	}
-
-	marshalledQuery, err := json.Marshal(&fullQuery)
+	body, err := c.Query("upsertCustomTimelineEntry", string(b), string(marshalled))
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, plainUrl, bytes.NewReader(marshalledQuery))
+	target := GraphqlResponse{}
+	json.Unmarshal(body, &target)
+	if target.Data.UpsertCustomTimelineEntry.Error != nil {
+		return nil, fmt.Errorf("Graphql error: %s", *target.Data.UpsertCustomTimelineEntry.Error)
+	}
+	
+	return target.Data.UpsertCustomTimelineEntry, nil
+}
+
+type issueTypeIn struct {
+	Input plain.CreateIssueTypeInput `json:"input,omitempty"`
+}
+	
+func (c *PlainClient) CreateIssueType(input plain.CreateIssueTypeInput) (*plain.CreateIssueTypeOutput, error) {
+	b, err := os.ReadFile("./pkg/plain/graphql/createIssueType.graphql") // just pass the file name
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
-	req.Header.Add("Content-Type", "application/json")
-	res, err := http.DefaultClient.Do(req)
+	mutationInput := issueTypeIn{
+		Input: input,
+	}
+	marshalled, err := json.Marshal(&mutationInput)
 	if err != nil {
 		return nil, err
 	}
 
-	resBody, err := io.ReadAll(res.Body)
+	body, err := c.Query("createIssueType", string(b), string(marshalled))
 	if err != nil {
 		return nil, err
 	}
-	var respData struct {
-		UpsertCustomTimelineEntry *plain.UpsertCustomTimelineEntryOutput
+
+	target := GraphqlResponse{}
+	json.Unmarshal(body, &target)
+	if target.Data.CreateIssueType.Error != nil {
+		return nil, fmt.Errorf("Graphql error: %s", *target.Data.CreateIssueType.Error)
 	}
-	json.Unmarshal(resBody, &respData)
-	if respData.UpsertCustomTimelineEntry.Error != nil {
-		return nil, fmt.Errorf("Graphql error: %s", respData.UpsertCustomTimelineEntry.Error.Message)
+	
+	return target.Data.CreateIssueType, nil
+}
+
+type issueIn struct {
+	Input plain.CreateIssueInput `json:"input,omitempty"`
+}
+	
+func (c *PlainClient) CreateIssue(input plain.CreateIssueInput) (*plain.CreateIssueOutput, error) {
+	b, err := os.ReadFile("./pkg/plain/graphql/createIssue.graphql") // just pass the file name
+	if err != nil {
+		return nil, err
 	}
-	return respData.UpsertCustomTimelineEntry, nil
+	mutationInput := issueIn{
+		Input: input,
+	}
+	marshalled, err := json.Marshal(&mutationInput)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := c.Query("createIssue", string(b), string(marshalled))
+	if err != nil {
+		return nil, err
+	}
+
+	target := GraphqlResponse{}
+	json.Unmarshal(body, &target)
+	if target.Data.CreateIssue.Error != nil {
+		return nil, fmt.Errorf("Graphql error: %s", *target.Data.CreateIssue.Error)
+	}
+	
+	return target.Data.CreateIssue, nil
 }
