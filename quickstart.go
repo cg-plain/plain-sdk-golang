@@ -4,22 +4,36 @@ import (
 	"cg-plain/plain-sdk-golang/pkg/plain"
 	"context"
 	"fmt"
+	"net/http"
+	"net/url"
 	"os"
 
 	gqlclient "git.sr.ht/~emersion/gqlclient"
 )
 
 func main() {
-	endpoint := ""
-	client := gqlclient.New(endpoint, nil)
+	endpoint := "https://core-api.uk.plain.com/graphql/v1"
+	token := os.Getenv("PLAIN_API_KEY")
+	client := gqlclient.New(endpoint, &http.Client{
+		Transport: &http.Transport{
+			Proxy: func(r *http.Request) (*url.URL, error) {
+				r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+				return nil, nil
+			},
+		},
+	})
 	custInput := plain.UpsertCustomerInput{
 		Identifier: plain.UpsertCustomerIdentifierInput{
 			EmailAddress: strPointer("hello@world.com"),
 		},
 	}
 	cust, err := plain.UpsertCustomer(client, context.Background(), custInput)
+	fmt.Printf("customer: %v", cust)
 	if err != nil {
 		panic(err)
+	}
+	if cust.Error != nil {
+		panic(cust.Error)
 	}
 	fmt.Printf(cust.Customer.FullName)
 
