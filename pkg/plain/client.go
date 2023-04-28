@@ -1,8 +1,7 @@
-package plain_handwritten
+package plain
 
 import (
 	"bytes"
-	"cg-plain/plain-sdk-golang/pkg/plain"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -26,32 +25,6 @@ func New(logger *zap.SugaredLogger, apiKey string) *PlainClient {
 		apiKey: apiKey,
 		logger: logger,
 	}
-}
-
-type in struct {
-	Input plain.UpsertCustomerInput `json:"input,omitempty"`
-}
-func (c *PlainClient) UpsertCustomer(input plain.UpsertCustomerInput) (*plain.UpsertCustomerOutput, error) {
-	b, err := os.ReadFile("./pkg/plain/graphql/upsertCustomer.graphql") // just pass the file name
-	if err != nil {
-		return nil, err
-	}
-	mutationInput := in{
-		Input: input,
-	}
-	marshalled, err := json.Marshal(&mutationInput)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := c.Query("upsertCustomer", string(b), string(marshalled))
-
-	target := GraphqlResponse{}
-	json.Unmarshal(body, &target)
-	if target.Data.UpsertCustomer.Error != nil {
-		return nil, fmt.Errorf("Graphql error: %s", *target.Data.UpsertCustomer.Error)
-	}
-	return target.Data.UpsertCustomer, nil
 }
 
 func (c *PlainClient) Query(operation, query, variables string) ([]byte, error) {
@@ -79,11 +52,38 @@ func (c *PlainClient) Query(operation, query, variables string) ([]byte, error) 
 	return io.ReadAll(res.Body)
 }
 
+type in struct {
+	Input UpsertCustomerInput `json:"input,omitempty"`
+}
+
+func (c *PlainClient) UpsertCustomer(input UpsertCustomerInput) (*UpsertCustomerOutput, error) {
+	b, err := os.ReadFile("./pkg/plain/graphql/upsertCustomer.graphql") // just pass the file name
+	if err != nil {
+		return nil, err
+	}
+	mutationInput := in{
+		Input: input,
+	}
+	marshalled, err := json.Marshal(&mutationInput)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := c.Query("upsertCustomer", string(b), string(marshalled))
+
+	target := GraphqlResponse{}
+	json.Unmarshal(body, &target)
+	if target.Data.UpsertCustomer.Error != nil {
+		return nil, fmt.Errorf("Graphql error: %s", *target.Data.UpsertCustomer.Error)
+	}
+	return target.Data.UpsertCustomer, nil
+}
+
 type timelineIn struct {
-	Input plain.UpsertCustomTimelineEntryInput `json:"input,omitempty"`
+	Input UpsertCustomTimelineEntryInput `json:"input,omitempty"`
 }
 	
-func (c *PlainClient) UpsertCustomTimelineEntry(input plain.UpsertCustomTimelineEntryInput) (*plain.UpsertCustomTimelineEntryOutput, error) {
+func (c *PlainClient) UpsertCustomTimelineEntry(input UpsertCustomTimelineEntryInput) (*UpsertCustomTimelineEntryOutput, error) {
 	b, err := os.ReadFile("./pkg/plain/graphql/upsertCustomTimelineEntry.graphql") // just pass the file name
 	if err != nil {
 		return nil, err
@@ -111,10 +111,10 @@ func (c *PlainClient) UpsertCustomTimelineEntry(input plain.UpsertCustomTimeline
 }
 
 type issueTypeIn struct {
-	Input plain.CreateIssueTypeInput `json:"input,omitempty"`
+	Input CreateIssueTypeInput `json:"input,omitempty"`
 }
 	
-func (c *PlainClient) CreateIssueType(input plain.CreateIssueTypeInput) (*plain.CreateIssueTypeOutput, error) {
+func (c *PlainClient) CreateIssueType(input CreateIssueTypeInput) (*CreateIssueTypeOutput, error) {
 	b, err := os.ReadFile("./pkg/plain/graphql/createIssueType.graphql") // just pass the file name
 	if err != nil {
 		return nil, err
@@ -142,10 +142,10 @@ func (c *PlainClient) CreateIssueType(input plain.CreateIssueTypeInput) (*plain.
 }
 
 type issueIn struct {
-	Input plain.CreateIssueInput `json:"input,omitempty"`
+	Input CreateIssueInput `json:"input,omitempty"`
 }
 	
-func (c *PlainClient) CreateIssue(input plain.CreateIssueInput) (*plain.CreateIssueOutput, error) {
+func (c *PlainClient) CreateIssue(input CreateIssueInput) (*CreateIssueOutput, error) {
 	b, err := os.ReadFile("./pkg/plain/graphql/createIssue.graphql") // just pass the file name
 	if err != nil {
 		return nil, err
