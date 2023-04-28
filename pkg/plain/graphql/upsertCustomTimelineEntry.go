@@ -1,4 +1,6 @@
-mutation upsertCustomTimelineEntry($input: UpsertCustomTimelineEntryInput!) {
+package graphql
+
+const UpsertCustomTimelineEntry = `mutation upsertCustomTimelineEntry($input: UpsertCustomTimelineEntryInput!) {
     upsertCustomTimelineEntry(input: $input) {
         result
         timelineEntry {
@@ -54,4 +56,4 @@ mutation upsertCustomTimelineEntry($input: UpsertCustomTimelineEntryInput!) {
             }
         }
     }
-}
+}`

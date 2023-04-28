@@ -1,12 +1,13 @@
 package plain
 
 import (
+	"cg-plain/plain-sdk-golang/pkg/plain/graphql"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
+
 
 	"go.uber.org/zap"
 )
@@ -57,10 +58,6 @@ type in struct {
 }
 
 func (c *PlainClient) UpsertCustomer(input UpsertCustomerInput) (*UpsertCustomerOutput, error) {
-	b, err := os.ReadFile("./pkg/plain/graphql/upsertCustomer.graphql") // just pass the file name
-	if err != nil {
-		return nil, err
-	}
 	mutationInput := in{
 		Input: input,
 	}
@@ -69,7 +66,7 @@ func (c *PlainClient) UpsertCustomer(input UpsertCustomerInput) (*UpsertCustomer
 		return nil, err
 	}
 
-	body, err := c.Query("upsertCustomer", string(b), string(marshalled))
+	body, err := c.Query("upsertCustomer", graphql.UpsertCustomer, string(marshalled))
 
 	target := GraphqlResponse{}
 	json.Unmarshal(body, &target)
@@ -84,10 +81,6 @@ type timelineIn struct {
 }
 	
 func (c *PlainClient) UpsertCustomTimelineEntry(input UpsertCustomTimelineEntryInput) (*UpsertCustomTimelineEntryOutput, error) {
-	b, err := os.ReadFile("./pkg/plain/graphql/upsertCustomTimelineEntry.graphql") // just pass the file name
-	if err != nil {
-		return nil, err
-	}
 	mutationInput := timelineIn{
 		Input: input,
 	}
@@ -96,7 +89,7 @@ func (c *PlainClient) UpsertCustomTimelineEntry(input UpsertCustomTimelineEntryI
 		return nil, err
 	}
 
-	body, err := c.Query("upsertCustomTimelineEntry", string(b), string(marshalled))
+	body, err := c.Query("upsertCustomTimelineEntry", graphql.UpsertCustomTimelineEntry, string(marshalled))
 	if err != nil {
 		return nil, err
 	}
@@ -115,10 +108,6 @@ type issueTypeIn struct {
 }
 	
 func (c *PlainClient) CreateIssueType(input CreateIssueTypeInput) (*CreateIssueTypeOutput, error) {
-	b, err := os.ReadFile("./pkg/plain/graphql/createIssueType.graphql") // just pass the file name
-	if err != nil {
-		return nil, err
-	}
 	mutationInput := issueTypeIn{
 		Input: input,
 	}
@@ -127,7 +116,7 @@ func (c *PlainClient) CreateIssueType(input CreateIssueTypeInput) (*CreateIssueT
 		return nil, err
 	}
 
-	body, err := c.Query("createIssueType", string(b), string(marshalled))
+	body, err := c.Query("createIssueType", graphql.CreateIssueType, string(marshalled))
 	if err != nil {
 		return nil, err
 	}
@@ -146,10 +135,6 @@ type issueIn struct {
 }
 	
 func (c *PlainClient) CreateIssue(input CreateIssueInput) (*CreateIssueOutput, error) {
-	b, err := os.ReadFile("./pkg/plain/graphql/createIssue.graphql") // just pass the file name
-	if err != nil {
-		return nil, err
-	}
 	mutationInput := issueIn{
 		Input: input,
 	}
@@ -158,7 +143,7 @@ func (c *PlainClient) CreateIssue(input CreateIssueInput) (*CreateIssueOutput, e
 		return nil, err
 	}
 
-	body, err := c.Query("createIssue", string(b), string(marshalled))
+	body, err := c.Query("createIssue", graphql.CreateIssue, string(marshalled))
 	if err != nil {
 		return nil, err
 	}

@@ -99,7 +99,7 @@ func main() {
 	fmt.Printf("Issue created, id %s\n", issue.Issue.Id)
 
 	// or, roll your own:
-	queryBytes, err := os.ReadFile("./pkg/plain/graphql/upsertCustomer.graphql") // just pass the file name
+	queryBytes, err := os.ReadFile("upsertCustomer.graphql")
 	if err != nil {
 		panic(err)
 	}
@@ -121,7 +121,18 @@ func main() {
 		panic(err)
 	}
 	fmt.Printf("raw output: %s\n", outputBytes)
-	target := plain.GraphqlResponse{}
+
+	type gData struct {
+		// if you want to do any other query, just match the output type to the appropriate one from the plain package
+		UpsertCustomer            *plain.UpsertCustomerOutput `json:"upsertCustomer,omitempty"`
+	}
+
+	type gResponse struct {
+		Data  gData `json:"data,omitempty"`
+	}
+	
+	
+	target := gResponse{}
 	json.Unmarshal(outputBytes, &target)
 	if target.Data.UpsertCustomer.Error != nil {
 		panic(*target.Data.UpsertCustomer.Error)
