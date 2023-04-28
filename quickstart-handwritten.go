@@ -52,7 +52,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf(out.Customer.Id)
+	fmt.Printf("customer %s, id: %s\n", *out.Result, out.Customer.Id)
 
 	timelineEntry, err := client.UpsertCustomTimelineEntry(plain.UpsertCustomTimelineEntryInput{
 		CustomerId: out.Customer.Id,
@@ -66,14 +66,13 @@ func main() {
 			},
 		},
 	})
-	fmt.Printf("timelineEntry: %v", timelineEntry)
 	if err != nil {
 		panic(err)
 	}
 	if timelineEntry.Error != nil {
 		panic(timelineEntry.Error.Message)
 	}
-	fmt.Printf(timelineEntry.TimelineEntry.Id)
+	fmt.Printf("timeline entry %s, id: %s\n", *timelineEntry.Result, timelineEntry.TimelineEntry.Id)
 
 	issueType, err := client.CreateIssueType(plain.CreateIssueTypeInput{
 		PublicName: "publicName",
@@ -81,7 +80,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf(issueType.IssueType.Id)
+	fmt.Printf("Issue type created, id %s\n", issueType.IssueType.Id)
 	issue, err := client.CreateIssue(plain.CreateIssueInput{
 		CustomerId: out.Customer.Id,
 		IssueTypeId: issueType.IssueType.Id,
@@ -92,25 +91,19 @@ func main() {
 	if issue.Error != nil {
 		panic(issue.Error.Message)
 	}
-	fmt.Printf(issue.Issue.Id)
+	fmt.Printf("Issue created, id %s\n", issue.Issue.Id)
 
 	// or, roll your own:
-	f, err := os.Open("./pkg/plain/graphql/upsertCustomer.graphql")
-	if err != nil {
-		panic(err)
-	}
-
-	queryBytes := make([]byte, 0)
-	_, err = f.Read(queryBytes)
+	queryBytes, err := os.ReadFile("./pkg/plain/graphql/upsertCustomer.graphql") // just pass the file name
 	if err != nil {
 		panic(err)
 	}
 	
 	type upsertIn struct {
-		input plain.UpsertCustomerInput `json:"input,omitempty"`
+		Input plain.UpsertCustomerInput `json:"input,omitempty"`
 	}
 	wrappedInput := upsertIn{
-		input: custInput,
+		Input: custInput,
 	}
 
 	inputBytes, err := json.Marshal(&wrappedInput)
@@ -122,5 +115,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("output: %s", outputBytes)
+	fmt.Printf("raw output: %s\n", outputBytes)
+	target := plain_handwritten.GraphqlResponse{}
+	json.Unmarshal(outputBytes, &target)
+	if target.Data.UpsertCustomer.Error != nil {
+		panic(*target.Data.UpsertCustomer.Error)
+	}
+	fmt.Printf("Customer %s, id: %s", *target.Data.UpsertCustomer.Result, target.Data.UpsertCustomer.Customer.Id)
 }

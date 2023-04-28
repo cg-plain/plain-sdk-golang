@@ -65,7 +65,6 @@ func (c *PlainClient) Query(operation, query, variables string) ([]byte, error) 
 	if err != nil {
 		return nil, err
 	}
-
 	req, err := http.NewRequest(http.MethodPost, plainUrl, bytes.NewReader(marshalledQuery))
 	if err != nil {
 		return nil, err
