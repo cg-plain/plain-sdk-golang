@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cg-plain/plain-sdk-golang/pkg/plain"
+	"github.com/cg-plain/plain-sdk-golang/pkg/plain"
 	"fmt"
 	"os"
 	"encoding/json"

@@ -1,7 +1,7 @@
 package plain
 
 import (
-	"cg-plain/plain-sdk-golang/pkg/plain/graphql"
+	"github.com/cg-plain/plain-sdk-golang/pkg/plain/graphql"
 	"bytes"
 	"encoding/json"
 	"fmt"

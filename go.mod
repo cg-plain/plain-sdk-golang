@@ -1,4 +1,4 @@
-module cg-plain/plain-sdk-golang
+module github.com/cg-plain/plain-sdk-golang/pkg/plain
 
 go 1.20
 
