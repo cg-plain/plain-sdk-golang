@@ -11,7 +11,7 @@ import (
 	gqlclient "git.sr.ht/~emersion/gqlclient"
 )
 
-func main() {
+func other() {
 	endpoint := "https://core-api.uk.plain.com/graphql/v1"
 	token := os.Getenv("PLAIN_API_KEY")
 	client := gqlclient.New(endpoint, &http.Client{
@@ -26,36 +26,59 @@ func main() {
 		Identifier: plain.UpsertCustomerIdentifierInput{
 			EmailAddress: strPointer("hello@world.com"),
 		},
+		OnCreate: plain.UpsertCustomerOnCreateInput{
+			FullName: "hello world",
+			Email: plain.EmailAddressInput{
+				Email:      "hello@world.com",
+				IsVerified: true,
+			},
+		},
+		OnUpdate: plain.UpsertCustomerOnUpdateInput{
+			FullName: &plain.StringInput{
+				Value: "hello world",
+			},
+			Email: &plain.EmailAddressInput{
+				Email:      "hello@world.com",
+				IsVerified: true,
+			},
+		},
 	}
 	cust, err := plain.UpsertCustomer(client, context.Background(), custInput)
-	fmt.Printf("customer: %v", cust)
 	if err != nil {
 		panic(err)
 	}
 	if cust.Error != nil {
-		panic(cust.Error)
+		panic(cust.Error.Message)
 	}
 	fmt.Printf(cust.Customer.FullName)
 
-	timelineEntry, err := plain.UpsertCustomTimelineEntry(client, context.Background(), plain.UpsertCustomTimelineEntryInput{
-		CustomerId: cust.Customer.Id,
-		Components: []plain.ComponentInput{
-			{
-				ComponentText: &plain.ComponentTextInput{
-					TextSize: textSizePointer(plain.ComponentTextSizeM),
-					Text:     "hello, world",
-				},
-			},
-		},
-	})
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf(timelineEntry.TimelineEntry.Id)
+	// timelineEntry, err := plain.UpsertCustomTimelineEntry(client, context.Background(), plain.UpsertCustomTimelineEntryInput{
+	// 	CustomerId: cust.Customer.Id,
+	// 	Title:      "test",
+	// 	Components: []plain.ComponentInput{
+	// 		{
+	// 			ComponentText: &plain.ComponentTextInput{
+	// 				TextSize: textSizePointer(plain.ComponentTextSizeM),
+	// 				Text:     "hello, world",
+	// 			},
+	// 		},
+	// 	},
+	// })
+	// fmt.Printf("timelineEntry: %v", timelineEntry)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// if timelineEntry.Error != nil {
+	// 	panic(timelineEntry.Error.Message)
+	// }
+	//fmt.Printf(timelineEntry.TimelineEntry.Id)
 
 	issue, err := plain.CreateIssue(client, context.Background(), plain.CreateIssueInput{})
 	if err != nil {
 		panic(err)
+	}
+	if issue.Error != nil {
+		panic(issue.Error.Message)
 	}
 	fmt.Printf(issue.Issue.Id)
 
@@ -76,12 +99,4 @@ func main() {
 		UpsertCustomer *plain.UpsertCustomerOutput
 	}
 	err = client.Execute(context.Background(), op, &respData)
-}
-
-func strPointer(input string) *string {
-	return &input
-}
-
-func textSizePointer(input plain.ComponentTextSize) *plain.ComponentTextSize {
-	return &input
 }
