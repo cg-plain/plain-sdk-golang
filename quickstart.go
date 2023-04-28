@@ -43,7 +43,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf(issue.Id)
+	fmt.Printf(issue.Issue.Id)
 
 	// or, roll your own:
 	f, err := os.Open("./graphql/upsertCustomer.graphql")

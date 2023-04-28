@@ -3127,6 +3127,16 @@ type WorkspaceSlackIntegrationEdge struct {
 	Node   *WorkspaceSlackIntegration `json:"node"`
 }
 
+func CreateIssue(client *gqlclient.Client, ctx context.Context, input CreateIssueInput) (createIssue *CreateIssueOutput, err error) {
+	op := gqlclient.NewOperation("mutation createIssue ($input: CreateIssueInput!) {\n\tcreateIssue(input: $input) {\n\t\tissue {\n\t\t\tid\n\t\t\tissueType {\n\t\t\t\tid\n\t\t\t\tpublicName\n\t\t\t\tisArchived\n\t\t\t\tarchivedAt {\n\t\t\t\t\tunixTimestamp\n\t\t\t\t\tiso8601\n\t\t\t\t}\n\t\t\t\tcreatedAt {\n\t\t\t\t\tunixTimestamp\n\t\t\t\t\tiso8601\n\t\t\t\t}\n\t\t\t\tupdatedAt {\n\t\t\t\t\tunixTimestamp\n\t\t\t\t\tiso8601\n\t\t\t\t}\n\t\t\t\ticon\n\t\t\t}\n\t\t\tcustomer {\n\t\t\t\tid\n\t\t\t\texternalId\n\t\t\t\tfullName\n\t\t\t\tshortName\n\t\t\t\temail {\n\t\t\t\t\temail\n\t\t\t\t\tisVerified\n\t\t\t\t}\n\t\t\t}\n\t\t\tstatus\n\t\t\tissueKey\n\t\t\tisDeleted\n\t\t\tdeletedAt {\n\t\t\t\tunixTimestamp\n\t\t\t\tiso8601\n\t\t\t}\n\t\t\tcreatedAt {\n\t\t\t\tunixTimestamp\n\t\t\t\tiso8601\n\t\t\t}\n\t\t\tupdatedAt {\n\t\t\t\tunixTimestamp\n\t\t\t\tiso8601\n\t\t\t}\n\t\t\tpriority {\n\t\t\t\tlabel\n\t\t\t\tvalue\n\t\t\t}\n\t\t}\n\t\terror {\n\t\t\tmessage\n\t\t\ttype\n\t\t\tcode\n\t\t\tfields {\n\t\t\t\tfield\n\t\t\t\tmessage\n\t\t\t\ttype\n\t\t\t}\n\t\t}\n\t}\n}\n")
+	op.Var("input", input)
+	var respData struct {
+		CreateIssue *CreateIssueOutput
+	}
+	err = client.Execute(ctx, op, &respData)
+	return respData.CreateIssue, err
+}
+
 func UpsertCustomTimelineEntry(client *gqlclient.Client, ctx context.Context, input UpsertCustomTimelineEntryInput) (upsertCustomTimelineEntry *UpsertCustomTimelineEntryOutput, err error) {
 	op := gqlclient.NewOperation("mutation upsertCustomTimelineEntry ($input: UpsertCustomTimelineEntryInput!) {\n\tupsertCustomTimelineEntry(input: $input) {\n\t\tresult\n\t\ttimelineEntry {\n\t\t\tid\n\t\t\tcustomerId\n\t\t\ttimestamp {\n\t\t\t\tiso8601\n\t\t\t}\n\t\t\tentry {\n\t\t\t\t... on CustomEntry {\n\t\t\t\t\ttitle\n\t\t\t\t\tcomponents {\n\t\t\t\t\t\t... on ComponentText {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\ttext\n\t\t\t\t\t\t\ttextSize\n\t\t\t\t\t\t\ttextColor\n\t\t\t\t\t\t}\n\t\t\t\t\t\t... on ComponentSpacer {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\tspacerSize\n\t\t\t\t\t\t}\n\t\t\t\t\t\t... on ComponentDivider {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\tspacingSize\n\t\t\t\t\t\t}\n\t\t\t\t\t\t... on ComponentLinkButton {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\turl\n\t\t\t\t\t\t\tlabel\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tactor {\n\t\t\t\t... on MachineUserActor {\n\t\t\t\t\tmachineUser {\n\t\t\t\t\t\tid\n\t\t\t\t\t\tfullName\n\t\t\t\t\t\tpublicName\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\terror {\n\t\t\tmessage\n\t\t\ttype\n\t\t\tcode\n\t\t\tfields {\n\t\t\t\tfield\n\t\t\t\tmessage\n\t\t\t\ttype\n\t\t\t}\n\t\t}\n\t}\n}\n")
 	op.Var("input", input)
