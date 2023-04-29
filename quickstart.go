@@ -105,6 +105,7 @@ func main() {
 	}
 	
 	type upsertIn struct {
+		// input type should match whatever input type is required by your query
 		Input plain.UpsertCustomerInput `json:"input,omitempty"`
 	}
 	wrappedInput := upsertIn{
