@@ -21,11 +21,14 @@ type PlainClient struct {
 	logger *zap.SugaredLogger
 }
 
-func New(logger *zap.SugaredLogger, apiKey string) *PlainClient {
+func New(logger *zap.SugaredLogger, apiKey string) (*PlainClient, error) {
+	if apiKey == "" {
+		return nil, fmt.Errorf("Api key cannot be blank.")
+	}
 	return &PlainClient{
 		apiKey: apiKey,
 		logger: logger,
-	}
+	}, nil
 }
 
 func (c *PlainClient) Query(operation, query, variables string) ([]byte, error) {

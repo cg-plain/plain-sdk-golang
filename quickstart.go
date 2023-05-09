@@ -28,7 +28,10 @@ func main() {
 	}
 
 	sugar := logger.Sugar()
-	client := plain.New(sugar, token)
+	client, err := plain.New(sugar, token)
+	if err != nil {
+		panic(err)
+	}
 
 	// upsert a customer
 	custInput := plain.UpsertCustomerInput{
