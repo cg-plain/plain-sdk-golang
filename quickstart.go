@@ -19,6 +19,9 @@ func textSizePointer(input plain.ComponentTextSize) *plain.ComponentTextSize {
 
 func main() {
 	token := os.Getenv("PLAIN_API_KEY")
+	if token == "" {
+		panic("Please set the environment variable PLAIN_API_KEY to your api key.")
+	}
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		panic(err)
